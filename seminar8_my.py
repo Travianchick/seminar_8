@@ -37,8 +37,12 @@ def read_file(file): # Функция чтения данных
 
 
 def show_data(data: list): # Функция вывода данных
-    for line in data:
-        print(line)
+# Блок печати вывода данных с нумерацией строк      
+    for idx, line in enumerate(data):
+        print(idx+1, line)
+# Блок печати вывода данных без нумерации строк    
+    # for line in data:
+    #     print(line)
     
 
 def save_data(file): # Функция сохранения данных
@@ -52,11 +56,14 @@ def save_data(file): # Функция сохранения данных
 
 
 def new_save(file, data): # Функция сохранения данных после изменений/ удалений
-    if len(data)>0:
-        with open(file, 'w', encoding='utf-8') as f: # Открытие файла с возможностью записи
-            f.seek(0) # Установка чтения файла в начальное положение (нулевое)
-            f.writelines(data) #(Перезапись всего файла с произведенными изменениями)
-        return True   
+    try:
+        if len(data)>0:
+            with open(file, 'w', encoding='utf-8') as f: # Открытие файла с возможностью записи
+                f.seek(0) # Установка чтения файла в начальное положение (нулевое)
+                f.writelines(data) #(Перезапись всего файла с произведенными изменениями)
+            return True  
+    except: 
+        return False
 
 
 def search_data(contacts: list[str]): # Функция поиска данных
@@ -89,13 +96,15 @@ def search_data(contacts: list[str]): # Функция поиска данных
 
 
 def edit_data(data, idx, file): # Функция изменения данных
+    if idx > len(data) - 1:
+        print('Нет строки с таким номером')
+        return
     print('0 - изменение имени')
     print('1 - изменение фамилии')
     print('2 - изменение отчества')
     print('3 - изменение номера телефона')
     edit_idx = input('Выберите, что вы хотите изменить: ') # для изменения фамилии, имени, отчества или номера телефона
     # Блок выбора меню 
-                                                                                             #PS дописать с помощью try, потому что выдает ошибку при 'else'!!!
     if edit_idx == '0':
         edit_str = input('Введите новое имя: ')
     elif edit_idx == '1':
@@ -105,7 +114,8 @@ def edit_data(data, idx, file): # Функция изменения данных
     elif edit_idx == '3':
         edit_str = input('Введите новый номер телефона: ')   
     else:
-        print('Ошибка, такой функции нет')    
+        print('Ошибка, такой функции нет') 
+        return   
     # Блок изменения данных в список (массив)
     contact_split = data[idx].split(', ') # 'idx' - номер строки в файле, которую надо изменить 
     contact_split[int(edit_idx)] = edit_str # изменение имени, фамилии или номера телефона, в зависимости от 'edit_idx' после разделения ее на список (массив)
@@ -126,14 +136,40 @@ def delete_data(data, idx, file): # Функция удаления данных
 
 
 def copy_to_file(data, idx, file_2): # Функция копирования (экспорта) данных в другой файл
-    if idx > len(data):
-        print('Нет строки с таким номером')
-        return
-    with open(file_2, 'a', encoding='utf-8') as export:
-        export.write(f'{data[idx]}\n')
-        # for i in range(len(data)):
-        #     if i != idx-1:
-        #         export.write(data[i])
+    # Блок с множествами, не закончен
+    # export_list = []
+    # counter = 0 # счетчик
+    # if len(data) > 0:
+    #     for i in idx:
+    #         line = data[i - 1].split(', ') 
+    #         export_list.append({}) # Создание множества
+    #         export_list[counter]['first_name'] = line[0] # Ключ имя - line[0]
+    #         export_list[counter]['last_name'] = line[1] # Ключ фамилия - line[1]
+    #         export_list[counter]['patronymic'] = line[2] # Ключ отчество - line[2]
+    #         export_list[counter]['phone_number'] = line[3] # Ключ номер телефона - line[3]
+    #         counter += 1
+    # try:
+    #     with open(file_2, 'a', encoding='utf-8') as export:
+    #             fieldnames = export_list[0].keys()
+    #             writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+    #             writer.writeheader()
+    #             writer.writerows(list_contacts)  
+    #     print ('Файл создан успешно')
+    # except Exception as exc:
+    #     print ('Возникли проблемы при сохранении:',exc)
+    
+    # # Блок для экспорта одной строки
+    # # if idx > len(data) - 1:
+    # #     print('Нет строки с таким номером')
+    # #     return
+    # # with open(file_2, 'a', encoding='utf-8') as export:
+    # #     export.write(f'{data[idx]}\n')
+    
+    # Блок экспорта строк в списке
+    for i in idx:
+        with open(file_2, 'a', encoding='utf-8') as export:
+            export.write(f'{data[i - 1]}\n')
+
 
 
 def main(): # Главная функция работы с данными
@@ -151,12 +187,12 @@ def main(): # Главная функция работы с данными
         answer = input('Выберите действие: ')
         if answer == '0': # в логике строчный вариант, а не цифра
             flag = False # Окончание работы программы
-        elif answer == '1':
+        elif answer == '1': # запись в записную книжку
             save_data(file_name) # Вызов функции сохранения данных
-        elif answer == '2':
+        elif answer == '2': # показать записную книжку
             data = read_file(file_name) # Вызов функции чтения данных
             show_data(data) # Вызов функции вывода данных
-        elif answer == '3':
+        elif answer == '3': # выполнить поиск в записной книжке
             data = read_file(file_name) # Вызов функции чтения данных
             founded_data = search_data(data) # Вызов функции поиска данных
             show_data(founded_data) # Вызов функции выводы данных после поиска
@@ -170,10 +206,18 @@ def main(): # Главная функция работы с данными
             delete_data(data, idx_delete, file_name) # Вызов функции изменения данных
         elif answer == '6': # Вызов функции удаления данных
             data = read_file(file_name) # Вызов функции чтения данных 
-            idx_copy = int(input('Введите номер строки, для экспорта: ')) - 1
-            copy_to_file(data, idx_copy, file_name_copy) # Вызов функции копирования (экспорта) данных в другой файл
+            # export_num = list(map(int,input().split(',')))
+            # print(export_num)
+            idx_copy_list = list(map(int, input('Введите номера строк для экспорта через запятую: ' ).split(','))) # функция map принимает в себя функцию int и переменные input, 
+#                                                                                                                   преобразованные в список с помощью split и list
+            if max(idx_copy_list) > len(data):
+                print ('Введеный номер строки больше максимальной, продолжение невозможно.')
+            else:
+                copy_to_file(data, idx_copy_list, file_name_copy) # Вызов функции копирования (экспорта) данных в другой файл
+            # idx_copy = int(input('Введите номер строки, для экспорта: ')) - 1
+            # copy_to_file(data, idx_copy, file_name_copy) # Вызов функции копирования (экспорта) данных в другой файл
         else:
-            print('Такого дейсвтия нет!')
+            print('Такого действия нет!')
             return
 
 
